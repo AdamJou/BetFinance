@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, TextInput, Button, Switch, Text, Alert } from "react-native";
+import dayjs from "dayjs";
 
 const CouponForm = ({ addCoupon }) => {
   const [stake, setStake] = useState("");
@@ -27,18 +28,15 @@ const CouponForm = ({ addCoupon }) => {
         return;
       }
     }
+
     addCoupon({
       id: Date.now(),
       stake: parsedStake,
       isWinning,
       amountWon: isWinning ? parsedAmountWon : 0,
-      dateAdded: new Date().toLocaleString("pl-PL", {
-        day: "2-digit",
-        month: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+      dateAdded: dayjs().format("YYYY-MM-DD HH:mm"),
     });
+
     setStake("");
     setAmountWon("");
     setIsWinning(false);
