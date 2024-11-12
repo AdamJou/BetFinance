@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { View, Text } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import TabNavigation from "../components/TabNavigation";
 import Balance from "../components/Balance";
 import CouponList from "../components/CouponList";
@@ -10,7 +11,41 @@ const MainScreen = () => {
   const [selectedTab, setSelectedTab] = useState(null);
   const [coupons, setCoupons] = useState([]);
 
+  const loadStoredData = async () => {
+    try {
+      const storedTabs = await AsyncStorage.getItem("tabs");
+      const storedCoupons = await AsyncStorage.getItem("coupons");
+
+      if (storedTabs) setTabs(JSON.parse(storedTabs));
+      if (storedCoupons) setCoupons(JSON.parse(storedCoupons));
+    } catch (error) {
+      console.log("An error ocurred while loading data:", error);
+    }
+  };
+
+  useEffect(() => {
+    loadStoredData();
+  }, []);
+
+  const storeData = async () => {
+    try {
+      await AsyncStorage.setItem("tabs", JSON.stringify(tabs));
+      await AsyncStorage.setItem("coupons", JSON.stringify(coupons));
+    } catch (error) {
+      console.log("An error ocurred while saving data:", error);
+    }
+  };
+  useEffect(() => {
+    storeData();
+  }, [tabs, coupons]);
+
   const addTab = (tab) => {
+    const tabExists = tabs.some((existingTab) => existingTab.name === tab.name);
+
+    if (tabExists) {
+      Alert.alert("Błąd", `Zakładka o nazwie "${tab.name}" już istnieje.`);
+      return;
+    }
     const newTab = { id: Date.now(), ...tab };
     setTabs([...tabs, newTab]);
     setSelectedTab(newTab.id);
