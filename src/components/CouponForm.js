@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TextInput, Button, Switch, Text } from "react-native";
+import { View, TextInput, Button, Switch, Text, Alert } from "react-native";
 
 const CouponForm = ({ addCoupon }) => {
   const [stake, setStake] = useState("");
@@ -7,25 +7,41 @@ const CouponForm = ({ addCoupon }) => {
   const [amountWon, setAmountWon] = useState("");
 
   const handleAddCoupon = () => {
-    if (stake) {
-      const now = new Date();
-      const formattedDate = `${String(now.getDate()).padStart(2, "0")}-${String(
-        now.getMonth() + 1
-      ).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(
-        now.getMinutes()
-      ).padStart(2, "0")}`;
+    const parsedStake = parseFloat(stake);
+    const parsedAmountWon = parseFloat(amountWon);
 
-      addCoupon({
-        id: Date.now(),
-        stake: parseFloat(stake),
-        isWinning,
-        amountWon: isWinning ? parseFloat(amountWon) : 0,
-        dateAdded: formattedDate,
-      });
-      setStake("");
-      setAmountWon("");
-      setIsWinning(false);
+    if (isNaN(parsedStake) || parsedStake <= 0) {
+      Alert.alert("Błąd", "Wkład musi być większy niż 0.");
+      return;
     }
+    if (isWinning) {
+      if (isNaN(parsedAmountWon) || parsedAmountWon <= 0) {
+        Alert.alert("Błąd", "Wygrana musi być większa niż 0.");
+        return;
+      }
+      if (parsedAmountWon <= parsedStake) {
+        Alert.alert(
+          "Błąd",
+          "Wygrana musi być większa niż wkład, aby kupon został uznany za wygrany."
+        );
+        return;
+      }
+    }
+    addCoupon({
+      id: Date.now(),
+      stake: parsedStake,
+      isWinning,
+      amountWon: isWinning ? parsedAmountWon : 0,
+      dateAdded: new Date().toLocaleString("pl-PL", {
+        day: "2-digit",
+        month: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    });
+    setStake("");
+    setAmountWon("");
+    setIsWinning(false);
   };
 
   return (
