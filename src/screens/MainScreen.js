@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text } from "react-native";
+import { View, Text, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import TabNavigation from "../components/TabNavigation";
 import Balance from "../components/Balance";
@@ -40,6 +40,12 @@ const MainScreen = () => {
   }, [tabs, coupons]);
 
   const addTab = (tab) => {
+    const tabExists = tabs.some((existingTab) => existingTab.name === tab.name);
+
+    if (tabExists) {
+      Alert.alert("Błąd", `Zakładka o nazwie "${tab.name}" już istnieje.`);
+      return;
+    }
     const newTab = { id: Date.now(), ...tab };
     setTabs([...tabs, newTab]);
     setSelectedTab(newTab.id);
